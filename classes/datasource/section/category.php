@@ -69,7 +69,12 @@ class DataSource_Section_Category extends Datasource_Section {
 			}
 		}
 
-		$this->_categories = new Sitemap(reset($rebuild_array));
+		if(!empty($rebuild_array))
+		{
+			$rebuild_array = reset($rebuild_array);
+		}
+
+		$this->_categories = new Sitemap($rebuild_array);
 
 		return $this->_categories;
 	}
