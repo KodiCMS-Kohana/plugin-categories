@@ -19,8 +19,12 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 	public function options()
 	{
 		$ds = Datasource_Data_Manager::load($this->from_ds);
-		
-		return $ds->sitemap()->select_choices('header');
+		if($ds === NULL)
+		{
+			return array();
+		}
+
+		return $ds->sitemap()->select_choices('header', TRUE, __('--- Not set ---'));
 	}
 	
 	public function remove()
@@ -82,5 +86,26 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 				->where('category_id', 'in', $values)
 				->execute();
 		}
+	}
+	
+	public static function fetch_widget_field( $widget, $field, $row, $fid, $recurse )
+	{
+		return $row[$fid];
+	}
+
+	public function get_query_props(\Database_Query $query)
+	{
+		$query
+			->join(array('dscategory_documents', 'dscd' . $this->id), 'left')
+				->on('d.id', '=', 'dscd' . $this->id . '.document_id');
+		
+		$node = Context::instance()->get('category_node');
+		if($node !== NULL)
+		{
+			$query
+				->where('dscd' . $this->id.'.category_id', '=', (int) $node);
+		}
+
+		return $query;
 	}
 }

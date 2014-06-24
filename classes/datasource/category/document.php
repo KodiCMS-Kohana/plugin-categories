@@ -40,4 +40,13 @@ class DataSource_Category_Document extends Datasource_Document {
 
 		return $rules;
 	}
+
+	public function remove()
+	{
+		DB::delete('dscategory_documents')
+			->where('category_id', '=', $this->id)
+			->execute();
+
+		return parent::remove();
+	}
 }

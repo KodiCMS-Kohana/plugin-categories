@@ -68,7 +68,7 @@ class DataSource_Section_Category extends Datasource_Section {
 				$row['childs'] = $rebuild_array[$row['id']];
 			}
 		}
-
+		
 		if(!empty($rebuild_array))
 		{
 			$rebuild_array = reset($rebuild_array);
