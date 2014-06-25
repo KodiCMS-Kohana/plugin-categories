@@ -18,6 +18,12 @@ class Model_Widget_Category_Hybrid extends Model_Widget_Hybrid {
 	 *
 	 * @var array 
 	 */
+	public $fetched_widgets = array();
+	
+	/**
+	 *
+	 * @var array 
+	 */
 	public $fields = array();
 	
 	/**
@@ -44,6 +50,8 @@ class Model_Widget_Category_Hybrid extends Model_Widget_Hybrid {
 	 */
 	public function set_values(array $data) 
 	{
+		$this->fields = $this->fetched_widgets = array();
+		
 		parent::set_values($data);
 		$this->only_published = (bool) Arr::get($data, 'only_published');
 		$this->throw_404 = (bool) Arr::get($data, 'throw_404');
@@ -55,6 +63,28 @@ class Model_Widget_Category_Hybrid extends Model_Widget_Hybrid {
 		if($this->deepness < 1) $this->deepness = 1;
 
 		return $this;
+	}
+	
+	public function set_fields($fields = array())
+	{
+		if( ! is_array($fields)) return;
+		foreach($fields as $field)
+		{
+			if(isset($field['id']))
+			{
+				$this->fields[] = (int) $field['id'];
+			
+				if(isset($field['fetcher']))
+				{
+					$this->fetched_widgets[(int) $field['id']] = array(
+						'ds_id' => (int) $field['ds_id'],
+						'widget_id' => (int) $field['fetcher']
+					);
+				}
+			}
+		}
+		
+		return $this->fields;
 	}
 	
 	public function get_ds_category_fields()
@@ -76,7 +106,7 @@ class Model_Widget_Category_Hybrid extends Model_Widget_Hybrid {
 		{
 			if($field->type != 'source_category') continue;
 			
-			$fields[$field->id] = $field->header;
+			$fields[$field->id] = $field;
 		}
 		
 		return $fields;
@@ -125,12 +155,11 @@ class Model_Widget_Category_Hybrid extends Model_Widget_Hybrid {
 			}
 		}
 		
-		
 		$query = DB::select('id', 'parent_id', 'slug', 'header', 'published', 'ds_id')
 			->from('dscategory')
 			->join('dscategory_documents', 'left')
 				->on('dscategory_documents.category_id', '=', 'dscategory.id')
-			->where('ds_id', 'in', $category_ids)
+			->where('ds_id', 'in', array_unique($category_ids))
 			->order_by('parent_id')
 			->order_by('position');
 		
@@ -153,19 +182,52 @@ class Model_Widget_Category_Hybrid extends Model_Widget_Hybrid {
 		
 		foreach($this->categories as $ds_id => $sub_categories)
 		{
-			$this->categories[$ds_id]['tree'] = $this->_build_tree($sub_categories['tree']);
+			$this->categories[$ds_id]['tree'] = $this->_build_tree($sub_categories['tree'], $ds_id);
 		}
 		
 		return $this->categories;
 	}
 	
-	protected function _build_tree($categories)
+	protected function _widget_id_by_ds_id($ds_id)
 	{
+		foreach ($this->fetched_widgets as $row)
+		{
+			if($row['ds_id'] == $ds_id)
+			{
+				return $row['widget_id'];
+			}
+		}
+		
+		return NULL;
+	}
+
+	protected function _build_tree($categories, $ds_id)
+	{
+		$widget_id = $this->_widget_id_by_ds_id($ds_id);
+		
+		
+		$widget = NULL;
+		
+		if($widget_id !== NULL)
+		{
+			$widget = $this->_fetch_related_widget($widget_id);
+		}
+		
 		$rebuild_array = array();
 		foreach ($categories as &$row)
 		{
 			$row['level'] = 0;
 			$row['published'] = (bool) $row['published'];
+			
+			if(($widget !== NULL AND $this->count_documents === FALSE OR ($this->count_documents AND $widget !== NULL AND $row['total'] > 0)))
+			{
+				Context::instance()->set('category_node', $row['id']);
+				$row['docs'] = $widget->reset()->get_documents();
+			}
+			else if($widget !== NULL)
+			{
+				$row['docs'] = array();
+			}
 			
 			if(!empty($this->category_id_ctx))
 			{
@@ -220,5 +282,21 @@ class Model_Widget_Category_Hybrid extends Model_Widget_Hybrid {
 		}
 		
 		return $content;
+	}
+	
+	protected function _fetch_related_widget( $widget_id )
+	{
+		if( empty($widget_id) ) return NULL;
+
+		$widget = Context::instance()->get_widget($widget_id);
+		
+		if( ! $widget)
+		{
+			$widget = Widget_Manager::load($widget_id);
+		}
+		
+		if($widget === NULL) return NULL;
+		
+		return $widget;
 	}
 }

@@ -61,7 +61,6 @@ class DataSource_Section_Category extends Datasource_Section {
 				{
 					$_row['level'] = Arr::get($row, 'level', 0) + 1;
 					$_row['parent'] = $row;
-
 					$_row['slug'] = $row['slug'] . '/' . $_row['slug'];
 				}
 					

@@ -15,6 +15,12 @@ class Model_Widget_Category_Headline extends Model_Widget_Decorator {
 	public $categories = NULL;
 	
 	/**
+	 * Идентификатор узла
+	 * @var string 
+	 */
+	public $category_id_ctx = 'category';
+	
+	/**
 	 * 
 	 * @return array
 	 */
