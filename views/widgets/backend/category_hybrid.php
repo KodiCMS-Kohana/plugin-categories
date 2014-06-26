@@ -40,11 +40,12 @@
 	</div>
 </div>
 
-<?php $fields = $widget->get_ds_category_fields(); ?>
+<?php $fields = DataSource_Hybrid_Field_Factory::get_section_fields($widget->ds_id, array('source_category')); ?>
 <div class="widget-header">
 	<h4><?php echo __('Fields that used to form hierarchy'); ?></h4>
 </div>
 <div class="widget-content">
+	<?php if(!empty($fields)): ?>
 	<table id="section-fields" class="table table-striped">
 		<colgroup>
 			<col width="30px" />
@@ -56,8 +57,8 @@
 			<?php foreach($fields as $field): ?>
 			<tr id="field-<?php echo $field->name; ?>">
 				<td class="f">
-					<?php echo Form::hidden('fields['.$field->id.'][ds_id]', $field->from_ds); ?>
-					<?php echo Form::checkbox('fields['.$field->id.'][id]', $field->id, in_array($field->id, $widget->fields)); ?>
+					<?php echo Form::hidden('widgets['.$field->id.'][ds_id]', $field->from_ds); ?>
+					<?php echo Form::checkbox('fields[]', $field->id, in_array($field->id, $widget->fields)); ?>
 				</td>
 				<td class="sys">
 					<?php echo substr($field->name, 2); ?>
@@ -70,7 +71,7 @@
 						$types = $field->widget_types();
 						if($types !== NULL)
 						{
-							$widgets = $widget->get_related_widgets($field->widget_types(), $widget->ds_id);
+							$widgets = Widget_Manager::get_related($field->widget_types(), $widget->ds_id);
 
 							if(isset($widgets[$widget->id])) unset($widgets[$widget->id]);
 
@@ -85,7 +86,7 @@
 									$selected = $widget->fetched_widgets[$field->id]['widget_id'];
 								}
 
-								echo Form::select('fields['.$field->id.'][fetcher]', $widgets, $selected); 
+								echo Form::select('widgets['.$field->id.'][widget_id]', $widgets, $selected); 
 							}
 						}
 					?>
@@ -94,11 +95,6 @@
 			<?php endforeach; ?>
 		</tbody>
 	</table>
-	
-	<?php if(!empty($fields)): ?>
-	<?php // echo Form::select('fields[]', $fields, (array) $widget->fields, array(
-//		'class' => 'input-block-level'
-//	)); ?>
 	<?php else: ?>
 	<div class="alert alert-warning">
 		<i class="icon icon-lightbulb"></i> <?php echo __('No category fields found'); ?>

@@ -10,5 +10,7 @@ return array(
 	'Category ID (Ctx)' => 'Идентификатор категории (CTX)',
 	'Fields that used to form hierarchy' => 'Поля по которым формируется иерархия',
 	'Categories Headline' => 'Список категорий',
-	'Categories for Hybrid documents' => 'Категории для ГД'
+	'Categories for Hybrid documents' => 'Категории для ГД',
+	'Related widget' => 'Связанный виджет',
+	'Category section' => 'Раздел категорий'
 );

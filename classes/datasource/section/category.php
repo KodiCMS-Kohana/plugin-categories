@@ -28,6 +28,7 @@ class DataSource_Section_Category extends Datasource_Section {
 
 
 	/**
+	 * Получения дерева категорий в виде объекта Sitemap
 	 * return Sitemap
 	 */
 	public function sitemap()
@@ -37,13 +38,18 @@ class DataSource_Section_Category extends Datasource_Section {
 			return $this->_categories;
 		}
 
-		$categories = DB::select('id', 'parent_id', 'slug', 'header', 'published')
-			->from($this->table())
-			->where('ds_id', '=', $this->id())
-			->order_by('parent_id')
-			->order_by('position')
-			->execute()
-			->as_array('id');
+		$this->_categories = new Sitemap($this->build_tree());
+
+		return $this->_categories;
+	}
+	
+	/**
+	 * Построение дерева категорий
+	 * @return array
+	 */
+	public function build_tree()
+	{
+		$categories = $this->get_query()->as_array('id');
 		
 		$rebuild_array = array();
 		foreach ($categories as &$row)
@@ -72,10 +78,28 @@ class DataSource_Section_Category extends Datasource_Section {
 		{
 			$rebuild_array = reset($rebuild_array);
 		}
+		
+		return $rebuild_array;
+	}
+	
+	/**
+	 * 
+	 * @return Database_Result
+	 */
+	public function get_query( $only_published = FALSE)
+	{
+		$query = DB::select('id', 'parent_id', 'slug', 'header', 'published')
+			->from($this->table())
+			->where('ds_id', '=', $this->id())
+			->order_by('parent_id')
+			->order_by('position');
+		
+		if( $only_published !== FALSE )
+		{
+			$query->where('published', '=', 1);
+		}
 
-		$this->_categories = new Sitemap($rebuild_array);
-
-		return $this->_categories;
+		return $query->execute();
 	}
 	
 	/**

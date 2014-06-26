@@ -95,13 +95,14 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 		return $row[$fid];
 	}
 
-	public function get_query_props(\Database_Query $query)
+	public function get_query_props(\Database_Query $query, DataSource_Hybrid_Agent $agent)
 	{
 		$query
 			->join(array('dscategory_documents', 'dscd' . $this->id), 'left')
 				->on('d.id', '=', 'dscd' . $this->id . '.document_id');
 		
-		$node = Context::instance()->get('category_node');
+		$node = Context::instance()->get('category_node_' . $this->ds_id);
+
 		if($node !== NULL)
 		{
 			$query
