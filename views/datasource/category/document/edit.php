@@ -15,6 +15,7 @@ var API_FORM_ACTION = '/datasource/<?php echo $ds->type(); ?>-document.<?php if(
 	)); ?>
 	<?php echo Form::hidden('ds_id', $ds->id()); ?>
 	<?php echo Form::hidden('id', $doc->id); ?>
+	<?php echo Form::hidden('csrf', Security::token()); ?>
 	<?php else: ?>
 	<div class="form-horizontal">
 	<?php endif; ?>
