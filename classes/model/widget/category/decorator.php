@@ -31,6 +31,13 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 	 * @var string 
 	 */
 	public $docs_uri = NULL;
+	
+	/**
+	 *
+	 * @var stdClass 
+	 */
+	protected $_current_category = NULL;
+
 	/**
 	 * 
 	 * @param array $data
@@ -43,10 +50,31 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 		$this->only_published = (bool) Arr::get($data, 'only_published');
 		$this->throw_404 = (bool) Arr::get($data, 'throw_404');
 		$this->docs_uri = Arr::get($data, 'docs_uri', $this->docs_uri);
+		$this->seo_information = (bool) Arr::get($data, 'seo_information');
+		$this->crumbs = (bool) Arr::get($data, 'crumbs');
 
 		return $this;
 	}
 	
+	protected function _load_category()
+	{
+		if($this->_current_category === NULL)
+		{
+			$category_id = (int) $this->_ctx->get($this->category_id_ctx);
+			$section = Datasource_Section::factory('category');
+
+			$this->_current_category = DB::select()
+				->from($section->table())
+				->where('id', '=', $category_id)
+				->as_object()
+				->limit(1)
+				->execute()
+				->current();
+		}
+		
+		return $this->_current_category;
+	}
+
 	protected function _load_related_widget( $widget_id )
 	{
 		if( empty($widget_id) ) return NULL;
@@ -74,6 +102,38 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 		}
 		
 		return NULL;
+	}
+	
+	public function on_page_load()
+	{
+		parent::on_page_load();
+		
+		if ( ! empty($this->category_id_ctx) AND $this->seo_information === TRUE)
+		{
+			$category = $this->_load_category();
+			
+			if ($category !== NULL)
+			{
+				$this->_ctx
+					->set('category.header', $category->header)
+					->set('category.description', $category->description);
+			}
+		}
+	}
+	
+	public function change_crumbs( Breadcrumbs &$crumbs )
+	{
+		parent::change_crumbs( $crumbs );
+		$page = $this->_ctx->get_page();
+		$category = $this->_load_category();
+		
+		$crumb = $crumbs->get_by('url', $page->url);
+		
+		if ($crumb !== NULL)
+		{
+			$crumb->active = FALSE;
+			$crumbs->add($category->header, FALSE, TRUE);
+		}
 	}
 
 	/**
@@ -104,7 +164,7 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 			$row['href'] = NULL;
 			$row['is_active'] = FALSE;
 
-			if(!empty($this->category_id_ctx))
+			if ( ! empty($this->category_id_ctx))
 			{
 				$row['href'] = URL::site($this->docs_uri . URL::query(array($this->category_id_ctx => $row['id'])));
 				

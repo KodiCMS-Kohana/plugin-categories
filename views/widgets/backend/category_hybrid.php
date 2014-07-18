@@ -36,6 +36,8 @@
 			<label class="checkbox"><?php echo Form::checkbox('throw_404', 1, $widget->throw_404); ?> <?php echo __('Generate error 404 when page has no content'); ?></label>
 			<label class="checkbox"><?php echo Form::checkbox('only_published', 1, $widget->only_published); ?> <?php echo __('Show only published documents'); ?></label>
 			<label class="checkbox"><?php echo Form::checkbox('count_documents', 1, $widget->count_documents); ?> <?php echo __('Request number of documents in nodes'); ?></label>
+			<label class="checkbox"><?php echo Form::checkbox('seo_information', 1, $widget->seo_information); ?> <?php echo __('Change meta headers'); ?></label>
+			<label class="checkbox"><?php echo Form::checkbox('crumbs', 1, $widget->crumbs); ?> <?php echo __('Change bread crumbs'); ?></label>
 		</div>
 	</div>
 </div>

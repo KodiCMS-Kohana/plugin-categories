@@ -87,6 +87,11 @@ class Model_Widget_Category_Hybrid extends Model_Widget_Category_Decorator {
 			}
 		}
 		
+		if (empty($category_ids))
+		{
+			return array();
+		}
+		
 		$query = DB::select('id', 'parent_id', 'slug', 'header', 'published', 'ds_id')
 			->from('dscategory')
 			->join('dscategory_documents', 'left')
