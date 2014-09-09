@@ -48,67 +48,100 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 	
 	public function onUpdateDocument(DataSource_Hybrid_Document $old = NULL, DataSource_Hybrid_Document $new) 
 	{
-		$old_categories = $old->get($this->name);
+		$old_categories = $this->get_values($new->id);
 		$new_categories = $new->get($this->name);
-		
-		$o = empty($old_categories) ? array() : explode(',', $old_categories);
-		$n = empty($new_categories) ? array() : explode(',', $new_categories);
-		
-		$this->remove_values($old->id, array_diff($o, $n));
-		$this->add_values($old->id, array_diff($n, $o));
+		$new_categories = empty($new_categories) ? array() : explode(',', $new_categories);
+
+		$this->remove_values($old->id, array_diff($old_categories, $new_categories));
+		$this->add_values($old->id, array_diff($new_categories, $old_categories));
 	}
 	
+	public function get_values($document_id)
+	{
+		return DB::select('category_id')
+			->from('dscategory_documents')
+			->where('field_id', '=', $this->id)
+			->where('document_id', '=', $document_id)
+			->execute()
+			->as_array(NULL, 'category_id');
+	}
+
 	public function add_values($document_id, array $values) 
 	{
-		if( ! empty($values) ) 
+		if (!empty($values))
 		{
 			$insert = DB::insert('dscategory_documents')
-				->columns(array(
-					'document_id', 'field_id', 'category_id'
+				->columns(array('document_id', 'field_id', 'category_id'));
+
+			foreach ($values as $category_id)
+			{
+				$insert->values(array(
+					$document_id, $this->id, $category_id
 				));
-			
-				foreach ($values as $category_id)
-				{
-					$insert->values(array(
-						$document_id, $this->id, $category_id
-					));
-				}
-				
+			}
+
 			$insert->execute();
 		}
 	}
 	
 	public function remove_values($document_id, array $values) 
 	{
-		if( ! empty($values)) 
+		if (!empty($values))
 		{
-			DB::delete('dscategory_documents')
+			return (bool) DB::delete('dscategory_documents')
 				->where('field_id', '=', $this->id)
 				->where('document_id', '=', $document_id)
 				->where('category_id', 'in', $values)
 				->execute();
 		}
+		
+		return FALSE;
 	}
 	
-	public static function fetch_widget_field( $widget, $field, $row, $fid, $recurse )
+	public function fetch_headline_value( $value, $document_id )
 	{
-		return $row[$fid];
-	}
+		if(empty($value))
+		{
+			return parent::fetch_headline_value($value, $document_id);
+		}
 
+		$category = DataSource_Hybrid_Field_Utils::get_document_header($this->from_ds, $value);
+		
+		if(!empty($category))
+		{
+			return HTML::anchor(Route::get('datasources')->uri(array(
+					'directory' => 'category',
+					'controller' => 'document',
+					'action' => 'view'
+				)) . URL::query(array('ds_id' => $this->from_ds, 'id' => $value), FALSE),
+				$category,
+				array(
+					'class' => ' popup fancybox.iframe'
+				)
+			);
+		}
+		
+		return parent::fetch_headline_value($value, $document_id);
+	}
+	
+	public function filter_condition(Database_Query $query, $condition, $value)
+	{
+		$table = 'dscd' . $this->id;
+		$query
+			->join(array('dscategory_documents', $table), 'left')
+			->on('d.id', '=', $table . '.document_id')
+			->where($table . '.category_id', $condition, $value);
+	}
+	
 	public function get_query_props(\Database_Query $query, DataSource_Hybrid_Agent $agent)
 	{
-		$query
-			->join(array('dscategory_documents', 'dscd' . $this->id), 'left')
-				->on('d.id', '=', 'dscd' . $this->id . '.document_id');
+		parent::get_query_props($query, $agent);
 		
-		$node = Context::instance()->get('category_node_' . $this->ds_id);
+		$node = Context::instance()->get('category_node_' . $this->from_ds);
 
 		if($node !== NULL)
 		{
-			$query
-				->where('dscd' . $this->id.'.category_id', '=', (int) $node);
+			$this->filter_condition($query, '=', (int) $node);
 		}
-
-		return $query;
 	}
 }

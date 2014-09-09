@@ -108,15 +108,16 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 	{
 		parent::on_page_load();
 		
-		if ( ! empty($this->category_id_ctx) AND $this->seo_information === TRUE)
+		if (!empty($this->category_id_ctx) AND $this->seo_information === TRUE)
 		{
 			$category = $this->_load_category();
-			
+
 			if ($category !== NULL)
 			{
-				$this->_ctx
-					->set('category.header', $category->header)
-					->set('category.description', $category->description);
+				$page = $this->_ctx->get_page();
+
+				$page->meta_params('category.header', $category->header, 'title');
+				$page->meta_params('category.description', $category->description, 'meta_description');
 			}
 		}
 	}

@@ -6,6 +6,12 @@
  */
 class DataSource_Category_Document extends Datasource_Document {
 	
+	/**
+	 *
+	 * @var DataSource_Category_Document 
+	 */
+	protected $_parent = NULL;
+	
 	protected $_system_fields = array(
 		'id' => NULL,
 		'ds_id' => 0,
@@ -48,5 +54,33 @@ class DataSource_Category_Document extends Datasource_Document {
 			->execute();
 
 		return parent::remove();
+	}
+	
+	/**
+	 * 
+	 * @return string
+	 */
+	public function get_uri()
+	{
+		if ($this->parent() !== NULL)
+		{
+			$result = $this->parent()->get_uri() . '/' . $this->slug;
+		}
+		else
+		{
+			$result = $this->slug;
+		}
+
+		return $result;
+	}
+	
+	public function parent()
+	{
+		if($this->_parent === NULL AND $this->parent_id > 0)
+		{
+			$this->_parent = $this->section()->get_document($this->parent_id);
+		}
+		
+		return $this->_parent;
 	}
 }

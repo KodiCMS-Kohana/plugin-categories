@@ -1,20 +1,8 @@
-<?php if(ACL::check($ds_type.$ds_id.'.document.edit')):?>
-<?php echo UI::button(__('Create Document'), array(
-	'href' => Route::url('datasources', array(
-		'controller' => 'document',
-		'directory' => $ds_type,
-		'action' => 'create'
-	)) . URL::query(array('ds_id' => $ds_id)),
-	'icon' => UI::icon( 'plus' ),
-	'hotkeys' => 'ctrl+a'
-)); ?>
-<?php endif; ?>
-
-<?php if(ACL::check($ds_type.$ds_id.'.document.sort')):?>
-<?php echo UI::button(__('Reorder'), array(
+<?php if($datasource->has_access('document.sort')):?>
+<?php echo UI::button(UI::hidden(__('Reorder')), array(
 	'id' => 'CategoriesReorderButton',
-	'class' => 'btn btn-primary',
-	'icon' => UI::icon('move icon-white'),
+	'class' => 'btn btn-default',
+	'icon' => UI::icon('sort'),
 	'hotkeys' => 'ctrl+s'
 )); ?>
 <?php endif; ?>
@@ -29,30 +17,30 @@
 				$('#CategoriesHeadlineHeader').show();
 				self.removeClass('btn-inverse');
 				
-				Api.get('/datasource-category', {ds_id: <?php echo $ds_id; ?>}, function(response) {
+				Api.get('/datasource-category', {ds_id: DS_ID}, function(response) {
 					if(! response.response ) return;
 					
 					$('#CategoriesHeadline').empty().html(response.response).show();
 					$('#CategoriesHeadlineHeader').show();
-				});
-				
+					cms.ui.init('icon');
+				});				
 			} else {
 				self.addClass('btn-inverse');
 				$('#CategoriesHeadline').hide();
 				$('#CategoriesHeadlineHeader').hide();
 
-				Api.get('/datasource-category.sort', {ds_id: <?php echo $ds_id; ?>}, function(response) {
+				Api.get('/datasource-category.sort', {ds_id: DS_ID}, function(response) {
 					$('#CategoriesReorderContaier')
 						.html(response.response)
 						.show();
 
-					$('#nestable').nestable({
+					$('.dd').nestable({
 						parent_id: 0,
 						listNodeName: 'ul',
-						listClass: 'dd-list unstyled',
+						listClass: 'dd-list list-unstyled',
 					}).on('change', function(e, el) {
 						var list   = e.length ? e : $(e.target);
-						Api.post('/datasource-category.sort', {ds_id: <?php echo $ds_id; ?>, 'categories': list.nestable('serialize')});
+						Api.post('/datasource-category.sort', {ds_id: DS_ID, 'categories': list.nestable('serialize')});
 					});
 				});
 			}

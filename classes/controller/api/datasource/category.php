@@ -22,7 +22,7 @@ class Controller_Api_Datasource_category extends Controller_System_API
 		$this->response((string) View::factory('datasource/category/children', array(
 			'level' => 0,
 			'data' => $ds->sitemap()->as_array(),
-			'section' => $ds
+			'datasource' => $ds
 		)));
 		
 	}

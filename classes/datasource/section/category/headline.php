@@ -8,7 +8,7 @@ class Datasource_Section_Category_Headline extends Datasource_Section_Headline {
 
 	public function get( array $ids = NULL )
 	{
-		Assets::js('nestable', ADMIN_RESOURCES . 'libs/nestable/jquery.nestable.js', 'jquery');
+		Assets_Package::load('nestable');
 		return $this->_section->sitemap()->as_array();
 	}
 	
