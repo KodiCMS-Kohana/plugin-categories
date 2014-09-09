@@ -116,8 +116,8 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 			{
 				$page = $this->_ctx->get_page();
 
-				$page->meta_params('category.header', $category->header, 'title');
-				$page->meta_params('category.description', $category->description, 'meta_description');
+				$page->meta_params('category.header', $category->header);
+				$page->meta_params('category.description', $category->description);
 			}
 		}
 	}
@@ -130,7 +130,7 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 		
 		$crumb = $crumbs->get_by('url', $page->url);
 		
-		if ($crumb !== NULL)
+		if ($crumb !== NULL AND $category !== NULL)
 		{
 			$crumb->active = FALSE;
 			$crumbs->add($category->header, FALSE, TRUE);
@@ -195,7 +195,7 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 		{
 			$rebuild_array = reset($rebuild_array);
 		}
-		
+
 		return new Sitemap($rebuild_array);
 	}
 
