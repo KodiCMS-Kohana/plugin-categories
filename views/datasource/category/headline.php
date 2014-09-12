@@ -1,11 +1,8 @@
 <table id="CategoriesHeadlineHeader" class="table no-margin-b">
-	<colgroup>
-		<col />
-	</colgroup>
 	<thead>
 		<tr>
 			<th class="col-xs-8"><?php echo __('Category'); ?></th>
-			<th class="col-xs-4"><?php echo __('Slug'); ?></th>
+			<th class="col-xs-4"><?php echo __('URI'); ?></th>
 		</tr>
 	</thead>
 </table>

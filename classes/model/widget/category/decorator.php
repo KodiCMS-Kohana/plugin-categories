@@ -201,7 +201,7 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 
 	/**
 	 * 
-	 * @return array
+	 * @return array [$categories]
 	 */
 	public function fetch_data()
 	{

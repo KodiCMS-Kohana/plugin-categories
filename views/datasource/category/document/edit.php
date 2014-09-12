@@ -1,22 +1,22 @@
 <script>
-<?php if(!$ds->has_access('document.edit')): ?>
+<?php if(!$document->has_access_change()): ?>
 $(function() {
 	$('input,textarea,select').attr('disabled', 'disabled');
 })
 <?php endif; ?>
-var API_FORM_ACTION = '/datasource/<?php echo $ds->type(); ?>-document.<?php if($doc->loaded()): ?>update<?php else: ?>create<?php endif; ?>'; 
+var API_FORM_ACTION = '/datasource/<?php echo $datasource->type(); ?>-document.<?php if($document->loaded()): ?>update<?php else: ?>create<?php endif; ?>'; 
 </script>
 
-<?php if($ds->has_access('document.edit')): ?>
+<?php if($document->has_access_change()): ?>
 <?php echo Form::open(Route::get('datasources')->uri(array(
 		'controller' => 'document',
-		'directory' => $ds->type(),
+		'directory' => $datasource->type(),
 		'action' => 'post'
 	)), array(
 	'class' => 'form-horizontal panel', 'enctype' => 'multipart/form-data'
 )); ?>
-<?php echo Form::hidden('ds_id', $ds->id()); ?>
-<?php echo Form::hidden('id', $doc->id); ?>
+<?php echo Form::hidden('ds_id', $datasource->id()); ?>
+<?php echo Form::hidden('id', $document->id); ?>
 <?php echo Form::token(); ?>
 <?php else: ?>
 <div class="form-horizontal panel">
@@ -25,7 +25,7 @@ var API_FORM_ACTION = '/datasource/<?php echo $ds->type(); ?>-document.<?php if(
 		<div class="form-group form-group-lg">
 			<label class="<?php echo Arr::get($form, 'label_class'); ?>"><?php echo __('Header'); ?></label>
 			<div class="<?php echo Arr::get($form, 'input_container_class'); ?>">
-				<?php echo Form::input('header', $doc->header, array(
+				<?php echo Form::input('header', $document->header, array(
 					'class' => 'form-control slug-generator', 'data-slug' => '.from-header'
 				)); ?>
 			</div>
@@ -38,7 +38,7 @@ var API_FORM_ACTION = '/datasource/<?php echo $ds->type(); ?>-document.<?php if(
 			<label class="<?php echo Arr::get($form, 'label_class'); ?>" for="slug"><?php echo __('Category slug'); ?></label>
 			<div class="<?php echo Arr::get($form, 'input_container_class'); ?>">
 				<div class="input-group">
-					<?php echo Form::input('slug', $doc->slug, array(
+					<?php echo Form::input('slug', $document->slug, array(
 						'class' => 'form-control slug from-header', 
 						'data-separator' => '-',
 						'id' => 'slug'
@@ -52,16 +52,16 @@ var API_FORM_ACTION = '/datasource/<?php echo $ds->type(); ?>-document.<?php if(
 		<div class="form-group form-inline">
 			<label class="<?php echo Arr::get($form, 'label_class'); ?>" for="parent_id"><?php echo __('Parent category'); ?></label>
 			<div class="<?php echo Arr::get($form, 'input_container_class'); ?>">
-				<?php echo Form::select('parent_id', $ds->sitemap()->exclude(array($doc->id), FALSE)->select_choices('header', TRUE, __('--- none ---')), $doc->parent_id); ?>
+				<?php echo Form::select('parent_id', $datasource->sitemap()->exclude(array($document->id), FALSE)->select_choices('header', TRUE, __('--- none ---')), $document->parent_id); ?>
 			</div>
 		</div>
 	</div>		
-	<?php if($ds->has_access('document.edit')): ?>
+	<?php if($document->has_access_change()): ?>
 	<div class="form-actions panel-footer">
 		<?php echo UI::actions(TRUE, Route::url('datasources', array(
 			'controller' => 'data',
 			'directory' => 'datasources'
-		)) . URL::query(array('ds_id' => $ds->id()), FALSE)); ?>
+		)) . URL::query(array('ds_id' => $datasource->id()), FALSE)); ?>
 	</div>
 <?php echo Form::close(); ?>
 <?php else: ?>

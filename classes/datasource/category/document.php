@@ -78,7 +78,14 @@ class DataSource_Category_Document extends Datasource_Document {
 	{
 		if($this->_parent === NULL AND $this->parent_id > 0)
 		{
-			$this->_parent = $this->section()->get_document($this->parent_id);
+			if($this->parent instanceof DataSource_Category_Document)
+			{
+				$this->_parent = $this->parent;
+			}
+			else
+			{
+				$this->_parent = $this->section()->get_document($this->parent_id);
+			}
 		}
 		
 		return $this->_parent;

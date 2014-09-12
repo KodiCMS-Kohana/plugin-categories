@@ -1,8 +1,8 @@
 <?php 
 $categories = array(__('--- Not set ---'));
-foreach ( Datasource_Data_Manager::get_all('category') as $id => $category )
+foreach ( Datasource_Data_Manager::get_all('category') as $id => $section )
 {
-	$categories[$id] = $category['name'];
+	$categories[$id] = $section->name;
 }
 ?>
 <div class="form-group" id="ds_<?php echo $id; ?>">

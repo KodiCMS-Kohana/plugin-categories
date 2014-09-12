@@ -56,6 +56,12 @@ class DataSource_Section_Category extends Datasource_Section {
 		{
 			$row['level'] = 0;
 			$row['published'] = (bool) $row['published'];
+			$row['uri'] = $row['slug'];
+			
+			$document = new DataSource_Category_Document($this);
+			$document->id = $row['id'];
+			$row = $document->read_values($row);
+					
 			$rebuild_array[$row['parent_id']][] = &$row;
 		}
 		
@@ -65,9 +71,12 @@ class DataSource_Section_Category extends Datasource_Section {
 			{
 				foreach ($rebuild_array[$row['id']] as & $_row)
 				{
-					$_row['level'] = Arr::get($row, 'level', 0) + 1;
+					$_row['level'] = $row['level'] + 1;
 					$_row['parent'] = $row;
-					$_row['slug'] = $row['slug'] . '/' . $_row['slug'];
+					$_row['uri'] = $row['slug'] . '/' . $_row['slug'];
+					$_row['parent'] = $row;
+					
+					$_row->set_read_only();
 				}
 					
 				$row['childs'] = $rebuild_array[$row['id']];
@@ -78,7 +87,7 @@ class DataSource_Section_Category extends Datasource_Section {
 		{
 			$rebuild_array = reset($rebuild_array);
 		}
-		
+
 		return $rebuild_array;
 	}
 	
