@@ -8,7 +8,6 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 	);
 	
 	protected $_widget_types = array('hybrid_headline');
-	
 	protected $_category_id = 0;
 
 	public function get_type()
@@ -127,21 +126,31 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 	public function filter_condition(Database_Query $query, $condition, $value)
 	{
 		$table = 'dscd' . $this->id;
-		$query
-			->join(array('dscategory_documents', $table), 'left')
-			->on('d.id', '=', $table . '.document_id')
-			->where($table . '.category_id', $condition, $value);
+			$this
+				->_join_table($query)
+				->where($table . '.category_id', $condition, $value);
 	}
 	
 	public function get_query_props(\Database_Query $query, DataSource_Hybrid_Agent $agent)
 	{
-		parent::get_query_props($query, $agent);
-		
+		$table = 'dscd' . $this->id;
+		$this
+			->_join_table($query)
+			->select(array($table . '.category_id', $this->id));
+	
 		$node = Context::instance()->get('category_node_' . $this->from_ds);
 
 		if($node !== NULL)
 		{
-			$this->filter_condition($query, '=', (int) $node);
+			$query->where($table . '.category_id', '=', (int) $node);
 		}
+	}
+	
+	protected function _join_table(Database_Query $query)
+	{
+		$table = 'dscd' . $this->id;
+		return $query
+			->join(array('dscategory_documents', $table), 'left')
+			->on('d.id', '=', $table . '.document_id');
 	}
 }
