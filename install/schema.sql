@@ -17,6 +17,6 @@ CREATE TABLE `__TABLE_PREFIX__dscategory_documents` (
   `category_id` int(11) NOT NULL default '0',
   `document_id` int(11) NOT NULL default '0',
   `field_id` int(11) NOT NULL default '0',
-  PRIMARY KEY  (`category_id`,`document_id`, `field_id`),
+  PRIMARY KEY  (`category_id`,`document_id`,`field_id`),
   KEY `document_id` (`document_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
