@@ -58,7 +58,7 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 	
 	protected function _load_category()
 	{
-		if($this->_current_category === NULL)
+		if ($this->_current_category === NULL)
 		{
 			$category_id = (int) $this->_ctx->get($this->category_id_ctx);
 			$section = Datasource_Section::factory('category');
@@ -71,23 +71,29 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 				->execute()
 				->current();
 		}
-		
+
 		return $this->_current_category;
 	}
 
 	protected function _load_related_widget( $widget_id )
 	{
-		if( empty($widget_id) ) return NULL;
+		if (empty($widget_id))
+		{
+			return NULL;
+		}
 
 		$widget = Context::instance()->get_widget($widget_id);
-		
-		if( ! $widget)
+
+		if (!$widget)
 		{
 			$widget = Widget_Manager::load($widget_id);
 		}
-		
-		if($widget === NULL) return NULL;
-		
+
+		if ($widget === NULL)
+		{
+			return NULL;
+		}
+
 		return $widget;
 	}
 	
@@ -95,19 +101,19 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 	{
 		foreach ($this->fetched_widgets as $row)
 		{
-			if($row['ds_id'] == $ds_id)
+			if ($row['ds_id'] == $ds_id)
 			{
 				return $row['widget_id'];
 			}
 		}
-		
+
 		return NULL;
 	}
 	
 	public function on_page_load()
 	{
 		parent::on_page_load();
-		
+
 		if (!empty($this->category_id_ctx) AND $this->seo_information === TRUE)
 		{
 			$category = $this->_load_category();
@@ -124,12 +130,12 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 	
 	public function change_crumbs( Breadcrumbs &$crumbs )
 	{
-		parent::change_crumbs( $crumbs );
+		parent::change_crumbs($crumbs);
 		$page = $this->_ctx->get_page();
 		$category = $this->_load_category();
-		
+
 		$crumb = $crumbs->get_by('url', $page->url);
-		
+
 		if ($crumb !== NULL AND $category !== NULL)
 		{
 			$crumb->active = FALSE;
@@ -151,34 +157,34 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 		{
 			$row['level'] = 0;
 			$row['published'] = (bool) $row['published'];
-			
-			if(($widget !== NULL AND $this->count_documents !== TRUE) OR ($this->count_documents AND $widget !== NULL AND $row['total'] > 0))
+
+			if (($widget !== NULL AND $this->count_documents !== TRUE) OR ( $this->count_documents AND $widget !== NULL AND $row['total'] > 0))
 			{
 				Context::instance()->set('category_node_' . $widget->ds_id, $row['id']);
 				$row['docs'] = $widget->reset()->get_documents();
 			}
-			else if($widget !== NULL)
+			else if ($widget !== NULL)
 			{
 				$row['docs'] = array();
 			}
-			
+
 			$row['href'] = NULL;
 			$row['is_active'] = FALSE;
 
-			if ( ! empty($this->category_id_ctx))
+			if (!empty($this->category_id_ctx))
 			{
-				$row['href'] = URL::site($this->docs_uri . URL::query(array($this->category_id_ctx => $row['id'])));
-				
+				$row['href'] = URL::frontend($this->docs_uri) . URL::query(array($this->category_id_ctx => $row['id']), FALSE);
+
 				$category_id = (int) $this->_ctx->get($this->category_id_ctx);
 				$row['is_active'] = $row['id'] == $category_id;
 			}
-			
+
 			$rebuild_array[$row['parent_id']][] = &$row;
 		}
 		
 		foreach ($categories as & $row)
 		{
-			if(isset($rebuild_array[$row['id']]))
+			if (isset($rebuild_array[$row['id']]))
 			{
 				foreach ($rebuild_array[$row['id']] as & $_row)
 				{
@@ -186,12 +192,12 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 					$_row['parent'] = $row;
 					$_row['slug'] = $row['slug'] . '/' . $_row['slug'];
 				}
-					
+
 				$row['childs'] = $rebuild_array[$row['id']];
 			}
 		}
-		
-		if(!empty($rebuild_array))
+
+		if (!empty($rebuild_array))
 		{
 			$rebuild_array = reset($rebuild_array);
 		}
