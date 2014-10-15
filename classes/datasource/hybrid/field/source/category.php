@@ -18,6 +18,17 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 			: 'INT(11) UNSIGNED';
 	}
 	
+	public function sections()
+	{
+		$sections = array(__('--- Not set ---'));
+		foreach (Datasource_Data_Manager::get_all($this->family) as $id => $section)
+		{
+			$sections[$id] = $section->name;
+		}
+		
+		return $sections;
+	}
+	
 	public function options()
 	{
 		$ds = Datasource_Data_Manager::load($this->from_ds);
@@ -124,11 +135,28 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 		return parent::fetch_headline_value($value, $document_id);
 	}
 	
-	public function filter_condition(Database_Query $query, $condition, $value)
+	public function filter_condition(Database_Query $query, $condition, $value, array $params = NULL)
 	{
-		$this
-			->_join_table($query)
-			->where($this->_join_table_name() . '.category_id', $condition, $value);
+		$field_name = 'category_id';
+		
+		if(!empty($params['field']))
+		{
+			$field_name = $params['field'];
+		}
+
+		$query = $this->_join_table($query);
+		
+		if($field_name == 'slug' OR $field_name == 'header')
+		{
+			$query
+				->join(array('dscategory', $this->_join_table_name('c')), 'left')
+				->on($this->_join_table_name('c') . '.id', '=', $this->_join_table_name() . '.category_id')
+				->where($this->_join_table_name('c') . '.' . $field_name, $condition, $value);
+		}
+		else
+		{
+			$query->where($this->_join_table_name() . '.' . $field_name, $condition, $value);
+		}
 	}
 	
 	public function get_query_props(\Database_Query $query, DataSource_Hybrid_Agent $agent)
@@ -160,8 +188,8 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 			->on('d.id', '=', $this->_join_table_name() . '.document_id');
 	}
 	
-	protected function _join_table_name()
+	protected function _join_table_name($preffix = NULL)
 	{
-		return 'dscd' . $this->id;
+		return 'dscd' . $this->id . $preffix;
 	}
 }

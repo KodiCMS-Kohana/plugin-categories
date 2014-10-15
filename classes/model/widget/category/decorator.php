@@ -39,6 +39,14 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 	protected $_current_category = NULL;
 
 	/**
+	 *
+	 * @var array 
+	 */
+	protected $_data = array(
+		'category_field' => 'id'
+	);
+
+	/**
 	 * 
 	 * @param array $data
 	 */
@@ -149,23 +157,27 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 	 * @param integer $ds_id
 	 * @return \Sitemap
 	 */
-	protected function _build_tree( array $categories, $widget_id)
+	protected function _build_tree(array $categories, $widget_id, $field_id = NULL)
 	{
 		$widget = $this->_load_related_widget($widget_id);
 		$rebuild_array = array();
+
 		foreach ($categories as &$row)
 		{
 			$row['level'] = 0;
 			$row['published'] = (bool) $row['published'];
 
-			if (($widget !== NULL AND $this->count_documents !== TRUE) OR ( $this->count_documents AND $widget !== NULL AND $row['total'] > 0))
+			if($widget !== NULL)
 			{
-				Context::instance()->set('category_node_' . $widget->ds_id, $row['id']);
-				$row['docs'] = $widget->reset()->get_documents();
-			}
-			else if ($widget !== NULL)
-			{
-				$row['docs'] = array();
+				if ($this->count_documents !== TRUE OR ($this->count_documents AND $row['total'] > 0))
+				{
+					Context::instance()->set('category_node_' . $widget->ds_id, $row['id']);
+					$row['docs'] = $widget->reset()->get_documents();
+				}
+				else
+				{
+					$row['docs'] = array();
+				}
 			}
 
 			$row['href'] = NULL;
@@ -173,10 +185,10 @@ abstract class Model_Widget_Category_Decorator extends Model_Widget_Decorator {
 
 			if (!empty($this->category_id_ctx))
 			{
-				$row['href'] = URL::frontend($this->docs_uri) . URL::query(array($this->category_id_ctx => $row['id']), FALSE);
+				$row['href'] = rtrim($this->docs_uri, '/') . '/' . Arr::get($row, $this->category_field, $row['id']);
 
-				$category_id = (int) $this->_ctx->get($this->category_id_ctx);
-				$row['is_active'] = $row['id'] == $category_id;
+				$category_id = $this->_ctx->get($this->category_id_ctx);
+				$row['is_active'] = Arr::get($row, $this->category_field, $row['id']) == $category_id;
 			}
 
 			$rebuild_array[$row['parent_id']][] = &$row;

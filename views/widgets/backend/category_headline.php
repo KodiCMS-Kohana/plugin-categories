@@ -12,6 +12,15 @@
 			)); ?>
 		</div>
 	</div>
+	
+	<div class="form-group">
+		<label class="control-label col-xs-3" for="category_field"><?php echo __('Category ID field'); ?></label>
+		<div class="col-xs-3">
+			<?php echo Form::select('category_field', array('id' => 'ID', 'slug' => 'Slug'), $widget->category_field, array(
+				'class' => 'form-control', 'id' => 'category_field'
+			)); ?>
+		</div>
+	</div>
 </div>
 
 <?php if($widget->ds_id): ?>

@@ -29,6 +29,15 @@
 	</div>
 	
 	<div class="form-group">
+		<label class="control-label col-xs-3" for="category_field"><?php echo __('Category ID field'); ?></label>
+		<div class="col-xs-3">
+			<?php echo Form::select('category_field', array('id' => 'ID', 'slug' => 'Slug'), $widget->category_field, array(
+				'class' => 'form-control', 'id' => 'category_field'
+			)); ?>
+		</div>
+	</div>
+	
+	<div class="form-group">
 		<div class="col-xs-offset-3 col-xs-9">
 			<label class="checkbox"><?php echo Form::checkbox('throw_404', 1, $widget->throw_404); ?> <?php echo __('Generate error 404 when page has no content'); ?></label>
 			<label class="checkbox"><?php echo Form::checkbox('only_published', 1, $widget->only_published); ?> <?php echo __('Show only published documents'); ?></label>
