@@ -134,6 +134,15 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 		
 		return parent::fetch_headline_value($value, $document_id);
 	}
+
+	public static function fetch_widget_field($widget, $field, $row, $fid, $recurse)
+	{
+		return array(
+			'id' => $row[$fid],
+			'slug' => $row[$fid . '_slug'],
+			'header' => $row[$fid . '_header'],
+		);
+	}
 	
 	public function filter_condition(Database_Query $query, $condition, $value, array $params = NULL)
 	{
@@ -148,10 +157,7 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 		
 		if($field_name == 'slug' OR $field_name == 'header')
 		{
-			$query
-				->join(array('dscategory', $this->_join_table_name('c')), 'left')
-				->on($this->_join_table_name('c') . '.id', '=', $this->_join_table_name() . '.category_id')
-				->where($this->_join_table_name('c') . '.' . $field_name, $condition, $value);
+			$query->where($this->_join_table_name('c') . '.' . $field_name, $condition, $value);
 		}
 		else
 		{
@@ -164,7 +170,9 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 		$this->_joined = FALSE;
 		$this
 			->_join_table($query)
-			->select(array($this->_join_table_name() . '.category_id', $this->id));
+			->select(array($this->_join_table_name() . '.category_id', $this->id))
+			->select(array($this->_join_table_name('c') . '.slug', $this->id . '_slug'))
+			->select(array($this->_join_table_name('c') . '.header', $this->id . '_header'));
 	
 		$node = Context::instance()->get('category_node_' . $this->from_ds);
 
@@ -185,7 +193,9 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 
 		return $query
 			->join(array('dscategory_documents', $this->_join_table_name()), 'left')
-			->on('d.id', '=', $this->_join_table_name() . '.document_id');
+			->on('d.id', '=', $this->_join_table_name() . '.document_id')
+			->join(array('dscategory', $this->_join_table_name('c')), 'left')
+			->on($this->_join_table_name('c') . '.id', '=', $this->_join_table_name() . '.category_id');
 	}
 	
 	protected function _join_table_name($preffix = NULL)
