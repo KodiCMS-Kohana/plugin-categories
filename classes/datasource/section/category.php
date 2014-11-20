@@ -75,8 +75,6 @@ class DataSource_Section_Category extends Datasource_Section {
 					$_row['parent'] = $row;
 					$_row['uri'] = $row['slug'] . '/' . $_row['slug'];
 					$_row['parent'] = $row;
-					
-					$_row->set_read_only();
 				}
 					
 				$row['childs'] = $rebuild_array[$row['id']];
