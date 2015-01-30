@@ -109,7 +109,7 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 		return FALSE;
 	}
 	
-	public function fetch_headline_value( $value, $document_id )
+	public function fetch_headline_value($value, $document_id)
 	{
 		if(empty($value))
 		{
@@ -139,8 +139,8 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 	{
 		return array(
 			'id' => $row[$fid],
-			'slug' => $row[$fid . '_slug'],
-			'header' => $row[$fid . '_header'],
+			'slug' => $row[$fid . '::slug'],
+			'header' => $row[$fid . '::header'],
 		);
 	}
 	
@@ -168,11 +168,12 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 	public function get_query_props(\Database_Query $query, DataSource_Hybrid_Agent $agent)
 	{
 		$this->_joined = FALSE;
+		
 		$this
 			->_join_table($query)
 			->select(array($this->_join_table_name() . '.category_id', $this->id))
-			->select(array($this->_join_table_name('c') . '.slug', $this->id . '_slug'))
-			->select(array($this->_join_table_name('c') . '.header', $this->id . '_header'));
+			->select(array($this->_join_table_name('c') . '.slug', $this->id . '::slug'))
+			->select(array($this->_join_table_name('c') . '.header', $this->id . '::header'));
 	
 		$node = Context::instance()->get('category_node_' . $this->from_ds);
 
@@ -183,7 +184,7 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 	}
 	
 	protected function _join_table(Database_Query $query)
-	{
+	{		
 		if($this->_joined === TRUE)
 		{
 			return $query;
@@ -201,5 +202,10 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 	protected function _join_table_name($preffix = NULL)
 	{
 		return 'dscd' . $this->id . $preffix;
+	}
+	
+	public function __clone()
+	{
+		$this->_joined = FALSE;
 	}
 }
