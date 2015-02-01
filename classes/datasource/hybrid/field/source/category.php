@@ -10,6 +10,14 @@ class DataSource_Hybrid_Field_Source_Category extends DataSource_Hybrid_Field_So
 	protected $_widget_types = array('hybrid_headline');
 	protected $_category_id = 0;
 	protected $_joined = FALSE;
+	
+	/**
+	 * return integer
+	 */
+	public function default_value()
+	{
+		return (int) $this->default;
+	}
 
 	public function get_type()
 	{
